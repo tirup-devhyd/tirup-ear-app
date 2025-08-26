@@ -1,31 +1,18 @@
-name: Build & Deploy EAR Locally
-
-on:
-  workflow_dispatch:    # Manual trigger
-  push:
-    branches:
-      - master
-
 jobs:
   build-deploy:
-    runs-on: self-hosted   # Use your local runner
+    runs-on: self-hosted
+    env:
+      JBOSS_HOME: /mnt/ForDevops/wildfly-37.0.0.Final   # persistent for all steps
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: '17'
 
       - name: Build EAR
         run: ./mvnw clean package -DskipTests
 
       - name: Deploy to local WildFly
         run: |
-          export JBOSS_HOME=/mnt/ForDevops/wildfly-37.0.0.Final
           cp ear/target/*.ear $JBOSS_HOME/standalone/deployments/
           for f in $JBOSS_HOME/standalone/deployments/*.ear; do
             touch "$f.dodeploy"
