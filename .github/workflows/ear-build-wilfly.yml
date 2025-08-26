@@ -1,3 +1,10 @@
+name: Build and Deploy EAR
+
+on:
+  push:
+    branches:
+      - main
+
 jobs:
   build-deploy:
     runs-on: self-hosted
@@ -8,15 +15,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build EAR
-        run: ./mvnw clean package -DskipTests
-
-      - name: Deploy to local WildFly
+      - name: Build and Deploy EAR
         run: |
+          # Build EAR locally
+          ./mvnw clean package -DskipTests
+          
+          # Ensure deployments directory exists
+          mkdir -p $JBOSS_HOME/standalone/deployments
+          
+          # Copy EAR to WildFly deployments
           cp ear/target/*.ear $JBOSS_HOME/standalone/deployments/
+          
+          # Trigger deployment
           for f in $JBOSS_HOME/standalone/deployments/*.ear; do
             touch "$f.dodeploy"
           done
-
-      - name: Verify Deployment
-        run: ls -l $JBOSS_HOME/standalone/deployments/
+          
+          # Verify deployment
+          ls -l $JBOSS_HOME/standalone/deployments/
