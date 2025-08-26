@@ -1,4 +1,4 @@
-name: Build and Deploy EAR
+name: Build and Deploy EAR with wildfly
 
 on:
   push:
